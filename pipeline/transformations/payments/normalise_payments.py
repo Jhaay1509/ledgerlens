@@ -1,5 +1,3 @@
-import psycopg2
-import pandas as pd
 from decimal import Decimal
 from datetime import datetime, timezone
 from pipeline.utils import get_data
