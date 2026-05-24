@@ -149,27 +149,41 @@ def generate_payments(num_records=1000):
 
 
 
-def generate_orders(num_of_entries=1000):
+def generate_orders(payments, num_of_entries=1000):
     orders = []
 
-    for _ in range(num_of_entries):
-        order_id = f"ORD-{uuid.uuid4().hex[:8].upper()}"
+    # Pre-assign unique payment references before the loop
+    # Sample without replacement ensures no duplicates
+    # Deduplicate payments by payment_id before sampling
+    unique_payments = list({p["payment_id"]: p for p in payments}.values())
+
+    num_with_reference = int(num_of_entries * 0.9)
+    sampled_payments = random.sample(unique_payments, min(num_with_reference, len(unique_payments)))
+    
+    # Build reference list — 90% real, 10% None — then shuffle
+    payment_references = [p["payment_id"] for p in sampled_payments]
+    payment_references += [None] * (num_of_entries - len(payment_references))
+    random.shuffle(payment_references)  # mix None values randomly
+
+    for i in range(num_of_entries):
+        order_id    = f"ORD-{uuid.uuid4().hex[:8].upper()}"
         customer_id = f"CUS-{uuid.uuid4().hex[:8].upper()}"
-        provider_name = random.choice(list(PROVIDERS.keys()))
+        payment_reference = payment_references[i]
 
-        payment_reference = f"{provider_name[:3].upper()}-{uuid.uuid4().hex[:8].upper()}" \
-            if random.random() > 0.1 else None
-
-        product = random.choice(PRODUCTS)
-        product_id = product["product_id"]
+        # Select a random product from the product catalogue
+        product      = random.choice(PRODUCTS)
+        product_id   = product["product_id"]
         product_name = product["product_name"]
 
-        currency = random.choice(["GBP", "USD", "EUR"])
-        status = random.choice(["processing", "shipped", "completed", "cancelled"])
-
+        currency        = random.choice(["GBP", "USD", "EUR"])
+        status          = random.choice(["processing", "shipped", 
+                                         "completed", "cancelled"])
         number_of_items = random.randint(1, 5)
+
+        # Amount derived from product price — realistic pricing
         amount_charged = round((number_of_items * product["price"]), 2)
 
+        # Order timestamp — random date within last year
         timestamp = fake.date_time_between(
             start_date="-1y",
             end_date="now",
@@ -177,16 +191,16 @@ def generate_orders(num_of_entries=1000):
         )
 
         order = {
-            "order_id":           order_id,
-            "customer_id":        customer_id,
-            "product_id":         product_id,
-            "product_name":       product_name,
-            "payment_reference":  payment_reference,
-            "currency":           currency,
-            "status":             status,
-            "number_of_items":    number_of_items,
-            "amount_charged":     amount_charged,
-            "timestamp":          timestamp
+            "order_id":          order_id,
+            "customer_id":       customer_id,
+            "product_id":        product_id,
+            "product_name":      product_name,
+            "payment_reference": payment_reference,  # links to canonical_payments
+            "currency":          currency,
+            "status":            status,
+            "number_of_items":   number_of_items,
+            "amount_charged":    amount_charged,
+            "timestamp":         timestamp
         }
         orders.append(order)
 
@@ -298,11 +312,11 @@ def generate_events(orders, number_of_entries=900):
 def save_json(data, filename):
     with open(f"{RAW_DATA_PATH}/{filename}.json", "w") as f:
         json.dump(data, f, indent=4, default= str)
-    print(f"Saved {len(data)} records to {RAW_DATA_PATH}/{filename}.csv")
+    print(f"Saved {len(data)} records to {RAW_DATA_PATH}/{filename}.json")
     
 #Save data as csv
 def save_csv(data, filename):
     df= pd.DataFrame(data)
     df.to_csv(f"{RAW_DATA_PATH}/{filename}.csv", index= False)
-    print(f"Saved {len(data)}records to {RAW_DATA_PATH}/{filename}.json")
+    print(f"Saved {len(data)}records to {RAW_DATA_PATH}/{filename}.csv")
               

@@ -14,6 +14,10 @@ CREATE TABLE canonical_orders (
     customer_id             VARCHAR(100) NOT NULL,
     product_id              VARCHAR(255) NOT NULL,
 
+    -- Payment reference from commerce system
+-- Added during reconciliation design to support Rule 1 matching
+    payment_reference       VARCHAR(255),
+
     -- Order details
     number_of_items         INT NOT NULL DEFAULT 1,
     amount_charged          NUMERIC(18,4) NOT NULL,

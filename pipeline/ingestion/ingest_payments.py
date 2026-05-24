@@ -1,9 +1,4 @@
-import os
-import psycopg2
 from pipeline.utils import get_connection
-
-
-
 
 copy_sql="""
         COPY stg_payments(payment_id, provider, amount, currency,
@@ -19,7 +14,7 @@ def ingest_payments_data():
             with open ("data/raw/raw_payments.csv", "r") as f:
                 cur.copy_expert(sql= copy_sql, file=f)
         conn.commit()
-    print ("raw_payments succeffully ingested into stg_Payments")
+    print ("raw_payments successfully ingested into stg_Payments")
     
 
 

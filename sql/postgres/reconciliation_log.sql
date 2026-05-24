@@ -12,7 +12,7 @@ CREATE TABLE reconciliation_log (
     reconciliation_id       VARCHAR(255) NOT NULL UNIQUE,
 
     -- Links to payment and order
-    payment_key             BIGINT NOT NULL 
+    payment_key             BIGINT 
                             REFERENCES canonical_payments(payment_key),
     order_key               BIGINT 
                             REFERENCES canonical_orders(order_key),

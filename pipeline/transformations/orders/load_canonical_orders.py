@@ -9,6 +9,7 @@ from pipeline.transformations.orders.deduplicate_orders import deduplicate_order
 sql = """
     INSERT INTO canonical_orders (
         order_id, customer_id, product_id,
+        payment_reference,
         status, currency, number_of_items,
         amount_charged, successful_payment_key, is_paid,
         total_paid, order_date
@@ -31,7 +32,7 @@ def load_canonical_orders(cleaned_data):
         row["order_id"],
         row["customer_id"],
         row["product_id"],
-       
+        row["payment_reference"],
         row["status"],
         row["currency"],
         row["number_of_items"],
@@ -54,3 +55,7 @@ if __name__ == "__main__":
     cleaned_data = deduplicate_orders(normalised_data)
     load_canonical_orders(cleaned_data)
     print(f"{len(cleaned_data)} orders successfully loaded into canonical_orders")
+
+
+  
+ 
