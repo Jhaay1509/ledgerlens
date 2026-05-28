@@ -19,7 +19,7 @@ CREATE TABLE canonical_payments (
 
     -- Natural identity
     payment_id          VARCHAR(255) NOT NULL,
-    provider            VARCHAR(100) NOT NULL,       -- comma was missing here
+    provider            VARCHAR(100) NOT NULL,      
 
     -- Amounts
     amount              NUMERIC(18,4) NOT NULL,
@@ -36,8 +36,7 @@ CREATE TABLE canonical_payments (
 
     -- Status
     status              payment_status NOT NULL,
-    is_retry            BOOLEAN NOT NULL DEFAULT FALSE,  -- comma was missing here
-
+    is_retry            BOOLEAN NOT NULL DEFAULT FALSE,  
     -- Timestamps
     paid_at             TIMESTAMPTZ NOT NULL,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
