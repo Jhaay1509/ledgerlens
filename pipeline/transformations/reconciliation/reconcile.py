@@ -107,6 +107,25 @@ def reconcile(orders, payments):
     """
     with get_connection() as conn:
         with conn.cursor() as cur:
+
+            # Clear previous reconciliation results before rerunning
+            cur.execute("TRUNCATE TABLE reconciliation_log")
+            cur.execute("TRUNCATE TABLE refund_events")
+            
+            # Reset canonical tables to pre-reconciliation state
+            cur.execute("""
+                UPDATE canonical_payments 
+                SET match_method = NULL, 
+                    match_confidence = NULL,
+                    updated_at = NOW()
+            """)
+            cur.execute("""
+                UPDATE canonical_orders 
+                SET successful_payment_key = NULL,
+                    is_paid = FALSE,
+                    total_paid = 0,
+                    updated_at = NOW()
+            """)
             for order in orders:
 
                 # ── Rule 1 — Direct payment reference match
