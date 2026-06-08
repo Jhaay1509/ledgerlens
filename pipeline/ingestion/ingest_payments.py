@@ -11,10 +11,15 @@ copy_sql="""
 def ingest_payments_data():
     with get_connection() as conn:
         with conn.cursor() as cur:
-            with open ("data/raw/raw_payments.csv", "r") as f:
-                cur.copy_expert(sql= copy_sql, file=f)
+            # Clear staging table first — ensures idempotency
+            cur.execute("TRUNCATE TABLE stg_payments")
+            
+            # Load fresh data
+            with open("data/raw/raw_payments.csv", "r") as f:
+                cur.copy_expert(sql=copy_sql, file=f)
+                
         conn.commit()
-    print ("raw_payments successfully ingested into stg_Payments")
+    print("raw_payments successfully ingested into stg_payments")
     
 
 

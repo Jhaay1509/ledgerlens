@@ -8,6 +8,11 @@ FROM STDIN WITH (FORMAT CSV, HEADER, DELIMITER ',')
 def ingest_refund_data():
     with get_connection() as conn:
         with conn.cursor() as cur:
+
+            # Clear staging table first — ensures idempotency
+            cur.execute("TRUNCATE TABLE stg_refunds")
+
+            #Load fresh data
             with open("data/raw/raw_refunds.csv", "r") as f:
                 cur.copy_expert(copy_sql,f)
         conn.commit()

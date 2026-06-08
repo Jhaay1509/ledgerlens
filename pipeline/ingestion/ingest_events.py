@@ -11,6 +11,11 @@ INSERT INTO stg_events (event_id, session_id, order_id, timestamp,
 def ingest_event_data():
     with get_connection() as conn:
         with conn.cursor() as cur:
+
+            #Clear staging table first - ensures idempotency
+            cur.execute("TRUNCATE TABLE stg_events")
+
+            #Load fresh data
             with open("data/raw/raw_events.json", "r") as f:
                 data = json.load(f)
                 rows = [(row["event_id"],

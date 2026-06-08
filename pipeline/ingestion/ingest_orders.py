@@ -12,6 +12,10 @@ INSERT INTO stg_orders(order_id, customer_id, product_id,product_name,
 def ingest_orders_data():
     with get_connection() as conn:
         with conn.cursor() as cur:
+            # Clear staging table first — ensures idempotency
+            cur.execute("TRUNCATE TABLE stg_orders")
+
+            # Load fresh data
             with open("data/raw/raw_orders.json", "r") as f:
                 data= json.load(f)
                 

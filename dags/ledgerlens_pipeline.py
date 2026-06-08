@@ -9,16 +9,11 @@ from pipeline.ingestion.ingest_orders import ingest_orders_data
 from pipeline.ingestion.ingest_refunds import ingest_refund_data
 from pipeline.ingestion.ingest_events import ingest_event_data
 
-# Payment transformation
-from pipeline.transformations.payments.normalise_payments import normalise_payment
-from pipeline.transformations.payments.deduplicate_payments import deduplicate_payments
-from pipeline.transformations.payments.load_canonical_payments import load_canonical_payments
-
-# Order transformation
-from pipeline.transformations.orders.normalise_orders import normalise_order
-from pipeline.transformations.orders.deduplicate_orders import deduplicate_orders
-from pipeline.transformations.orders.load_canonical_orders import load_canonical_orders
-
+# Transformation
+from pipeline.transformations.run_pipelines import (
+    run_payment_pipeline, run_order_pipeline,
+    run_reconciliation, run_apply_refunds
+)
 # Reconciliation and refunds
 from pipeline.transformations.reconciliation.reconcile import reconcile
 from pipeline.transformations.refunds.apply_refunds import apply_refunds
@@ -61,52 +56,36 @@ with DAG(
     )
 
     # ── Payment transformation chain
-    normalise_payment_task = PythonOperator(
-        task_id='normalise_payments',
-        python_callable=normalise_payment
-    )
-    deduplicate_payment_task = PythonOperator(
-        task_id='deduplicate_payments',
-        python_callable=deduplicate_payments
-    )
-    load_payment_task = PythonOperator(
-        task_id='load_canonical_payments',
-        python_callable=load_canonical_payments
-    )
+    payment_pipeline_task = PythonOperator(
+    task_id='payment_pipeline',
+    python_callable=run_payment_pipeline
+)
 
     # ── Order transformation chain
-    normalise_order_task = PythonOperator(
-        task_id='normalise_orders',
-        python_callable=normalise_order
-    )
-    deduplicate_order_task = PythonOperator(
-        task_id='deduplicate_orders',
-        python_callable=deduplicate_orders
-    )
-    load_order_task = PythonOperator(
-        task_id='load_canonical_orders',
-        python_callable=load_canonical_orders
-    )
+    order_pipeline_task = PythonOperator(
+    task_id='order_pipeline',
+    python_callable=run_order_pipeline
+)
 
     # ── Reconciliation
     reconcile_task = PythonOperator(
         task_id='reconcile',
-        python_callable=reconcile
+        python_callable=run_reconciliation
     )
 
     # ── Refund application
     apply_refund_task = PythonOperator(
         task_id='apply_refunds',
-        python_callable=apply_refunds
+        python_callable= run_apply_refunds
     )
 
     # ── Dependencies
     start >> [ingest_payment, ingest_order, ingest_refund, ingest_event]
 
-    ingest_payment >> normalise_payment_task >> deduplicate_payment_task >> load_payment_task
-    ingest_order   >> normalise_order_task   >> deduplicate_order_task   >> load_order_task
+    ingest_payment >> payment_pipeline_task
+    ingest_order   >> order_pipeline_task
 
-    [load_payment_task, load_order_task] >> reconcile_task
+    [payment_pipeline_task, order_pipeline_task] >> reconcile_task
 
     [reconcile_task, ingest_refund] >> apply_refund_task
 
