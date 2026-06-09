@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS `my-project-altschool.ledgerlens.dim_product` (
     -- SCD Type 2 tracking
     valid_from          DATE NOT NULL,
     valid_to            DATE,
-    is_current          BOOLEAN NOT NULL DEFAULT TRUE
+    is_current          BOOLEAN NOT NULL
 );

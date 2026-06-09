@@ -73,6 +73,7 @@ x-airflow-common:
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-psycopg2-binary pandas python-dotenv faker google-cloud-bigquery}
     # The following line can be used to set a custom config file, stored in the local config folder
+    GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/credentials/service_account.json
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
     PYTHONPATH: '/opt/airflow'
   volumes:
