@@ -147,6 +147,10 @@ Real data sources — synthetic data generation would be replaced with actual pr
 Grafana monitoring — data quality dashboards planned for orphan rates, duplicate rates, and reconciliation health
 Attribution completeness — currently ~10% of orders have no marketing attribution; production would improve linkage with user event logs
 
+## Architecture
+The diagram below shows the end-to-end data flow for the LRTS pipeline 
+
+![LRTS Pipeline](docs/architecture/lrts_architecture.svg)
 
 Author
-Built by Julius Idowu as a portfolio project targeting data engineering roles.
+Built by Julius Idowu as a portfolio project targeting data engineering roles
