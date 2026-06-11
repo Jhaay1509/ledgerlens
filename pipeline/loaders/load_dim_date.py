@@ -2,6 +2,7 @@ import os
 from datetime import date, timedelta
 from google.cloud import bigquery
 from dotenv import load_dotenv
+from pipeline.utils import get_bigquery_client
 
 load_dotenv()
 
@@ -26,8 +27,7 @@ def generate_dim_date(start_date, end_date):
 
 def load_dim_date():
     """Generate date dimension and load into BigQuery."""
-    client = bigquery.Client(project="my-project-altschool")
-
+    client = get_bigquery_client
     start_date = date(2020, 1, 1)
     end_date   = date(2030, 12, 31)
 

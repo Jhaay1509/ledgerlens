@@ -20,3 +20,9 @@ def get_data(sql):
                 cur.execute(sql)
                 data = cur.fetchall()
     return data
+
+from google.cloud import bigquery
+
+def get_bigquery_client():
+    """Return authenticated BigQuery client."""
+    return bigquery.Client(project=os.getenv("BIGQUERY_PROJECT_ID"))
