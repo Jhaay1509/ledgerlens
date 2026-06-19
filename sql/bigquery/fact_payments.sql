@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `my-project-altschool.ledgerlens.fact_payments` (
+CREATE OR REPLACE TABLE `my-project-altschool.ledgerlens.fact_payments` (
     -- Traceability
     payment_key     INT64 NOT NULL,
     payment_id      STRING NOT NULL,
@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `my-project-altschool.ledgerlens.fact_payments` (
 
     -- Foreign keys to dimensions
     date_key        DATE NOT NULL,
-    product_key     INT64 NOT NULL,
+    product_key     INT64,
     country_key     INT64 NOT NULL,
     attribution_key INT64,          -- nullable — not all payments have attribution
 
