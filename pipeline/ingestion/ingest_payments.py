@@ -1,8 +1,8 @@
 from pipeline.utils import get_connection
 
-copy_sql="""
-        COPY stg_payments(payment_id, provider, amount, currency,
-    order_id, status, timestamp)
+copy_sql = """
+    COPY stg_payments(payment_id, provider, amount, currency,
+    status, order_id, timestamp)
     FROM STDIN WITH (FORMAT CSV, HEADER, DELIMITER ',')
 """
     

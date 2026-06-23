@@ -19,8 +19,8 @@ sql = """
         ev.utm_medium,
         ev.utm_campaign
     FROM canonical_payments p
-    LEFT JOIN canonical_orders o ON p.order_id = o.order_id
-    LEFT JOIN stg_events ev ON p.order_id = ev.order_id
+    LEFT JOIN canonical_orders o ON o.payment_reference = p.payment_id
+    LEFT JOIN stg_events ev ON o.order_id = ev.order_id
 """
 
 
