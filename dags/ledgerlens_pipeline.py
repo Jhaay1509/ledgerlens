@@ -14,9 +14,15 @@ from pipeline.transformations.run_pipelines import (
     run_payment_pipeline, run_order_pipeline,
     run_reconciliation, run_apply_refunds
 )
-# Reconciliation and refunds
-from pipeline.transformations.reconciliation.reconcile import reconcile
-from pipeline.transformations.refunds.apply_refunds import apply_refunds
+
+# BigQuery Loader
+from pipeline.loaders.load_dim_date import load_dim_date
+from pipeline.loaders.load_dim_country import load_dim_country
+from pipeline.loaders.load_dim_product import load_dim_product
+from pipeline.loaders.load_dim_attribution import load_dim_attribution
+from pipeline.loaders.load_fact_payments import load_fact_payments
+from pipeline.loaders.load_fact_orders import load_fact_orders
+from pipeline.loaders.load_daily_revenue import load_daily_revenue
 
 default_args = {
     'owner': 'ledgerlens',
@@ -78,6 +84,48 @@ with DAG(
         task_id='apply_refunds',
         python_callable= run_apply_refunds
     )
+    
+    # -- Load dim_date
+    load_date_task = PythonOperator(
+        task_id= 'load_date',
+        python_callable= load_dim_date
+    )
+    
+    # -- Load dim_country
+    load_country_task = PythonOperator(
+        task_id = 'load_country',
+        python_callable= load_dim_country
+    )
+
+    # -- Load dim_product
+    load_product_task = PythonOperator(
+        task_id= 'load_product',
+        python_callable= load_dim_product
+    )
+
+    # -- Load dim_attribution
+    load_attribution_task = PythonOperator(
+        task_id= 'load_attribution',
+        python_callable= load_dim_attribution
+    )
+
+    # -- Load fact_payments
+    load_fact_payments_task = PythonOperator(
+        task_id = 'load_fct_payments',
+        python_callable= load_fact_payments
+    )
+
+    # -- Load fact_orders
+    load_fact_orders_task = PythonOperator(
+        task_id = 'load_fct_orders',
+        python_callable= load_fact_orders
+    )
+    
+    # -- Load_daily revenue
+    load_daily_revenue_task= PythonOperator(
+        task_id= 'load_dly_revenue',
+        python_callable= load_daily_revenue
+    )
 
     # ── Dependencies
     start >> [ingest_payment, ingest_order, ingest_refund, ingest_event]
@@ -89,4 +137,25 @@ with DAG(
 
     [reconcile_task, ingest_refund] >> apply_refund_task
 
-    [apply_refund_task, ingest_event] >> end
+    # [apply_refund_task, ingest_event] >> [
+    #     load_date_task,
+    #     load_country_task,
+    #     load_product_task,
+    #     load_attribution_task]
+    
+    for dim_task in [load_date_task,load_country_task,load_product_task,
+                     load_attribution_task]:
+        [apply_refund_task, ingest_event] >> dim_task
+        
+    
+    for fact_task in [load_fact_payments_task, load_fact_orders_task]:
+        [
+        load_date_task,
+        load_country_task,
+        load_product_task,
+        load_attribution_task
+        ] >> fact_task
+
+    [load_fact_payments_task, load_fact_orders_task]  >> load_daily_revenue_task
+    
+    load_daily_revenue_task >> end
