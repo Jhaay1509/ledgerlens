@@ -76,6 +76,7 @@ x-airflow-common:
     GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/credentials/service_account.json
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
     PYTHONPATH: '/opt/airflow'
+
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/pipeline:/opt/airflow/pipeline
@@ -300,5 +301,21 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres-db-volume:
+  grafana-storage:
